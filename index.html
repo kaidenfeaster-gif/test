@@ -1,97 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Click Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #111;
-      color: white;
-    }
-
-    #gameArea {
-      width: 400px;
-      height: 400px;
-      margin: 20px auto;
-      position: relative;
-      background: #222;
-      border: 2px solid #fff;
-    }
-
-    .target {
-      width: 40px;
-      height: 40px;
-      background: red;
-      border-radius: 50%;
-      position: absolute;
-      cursor: pointer;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Space Miner Tycoon</title>
+    <style>
+        body {
+            background-color: #0b0e14;
+            color: #00d4ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            user-select: none;
+        }
+        #game-container {
+            margin-top: 50px;
+        }
+        #asteroid {
+            width: 200px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 0 10px #555);
+        }
+        #asteroid:active {
+            transform: scale(0.9);
+        }
+        .stats {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .shop {
+            background: #1a1f29;
+            width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #00d4ff;
+        }
+        button {
+            background: #00d4ff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
 
-<h1>🎯 Click the Target!</h1>
-<p>Score: <span id="score">0</span></p>
-<p>Time: <span id="time">10</span>s</p>
-<button onclick="startGame()">Start Game</button>
+    <div id="game-container">
+        <h1>🚀 Space Miner</h1>
+        <div class="stats">Crystals: <span id="crystal-count">0</span></div>
+        
+        <img src="https://cdn-icons-png.flaticon.com/512/2530/2530833.png" id="asteroid" alt="Asteroid">
+        
+        <div class="stats" style="font-size: 16px;">Crystals per second: <span id="cps-count">0</span></div>
 
-<div id="gameArea"></div>
+        <div class="shop">
+            <h3>Ship Upgrades</h3>
+            <p>Auto-Miner Cost: <span id="upgrade-cost">10</span></p>
+            <button id="buy-btn">Buy Auto-Miner</button>
+        </div>
+    </div>
 
-<script>
-  let score = 0;
-  let timeLeft = 10;
-  let gameInterval;
+    <script>
+        let crystals = 0;
+        let autoMiners = 0;
+        let minerCost = 10;
 
-  function startGame() {
-    score = 0;
-    timeLeft = 10;
-    document.getElementById("score").textContent = score;
-    document.getElementById("time").textContent = timeLeft;
+        const crystalDisplay = document.getElementById('crystal-count');
+        const cpsDisplay = document.getElementById('cps-count');
+        const costDisplay = document.getElementById('upgrade-cost');
+        const asteroid = document.getElementById('asteroid');
+        const buyBtn = document.getElementById('buy-btn');
 
-    spawnTarget();
+        // Clicking the asteroid
+        asteroid.addEventListener('click', () => {
+            crystals++;
+            updateDisplay();
+        });
 
-    gameInterval = setInterval(() => {
-      timeLeft--;
-      document.getElementById("time").textContent = timeLeft;
+        // Buying an upgrade
+        buyBtn.addEventListener('click', () => {
+            if (crystals >= minerCost) {
+                crystals -= minerCost;
+                autoMiners++;
+                minerCost = Math.round(minerCost * 1.5); // Price goes up!
+                updateDisplay();
+            }
+        });
 
-      if (timeLeft <= 0) {
-        clearInterval(gameInterval);
-        document.getElementById("gameArea").innerHTML = "";
-        alert("Game Over! Your score: " + score);
-      }
-    }, 1000);
-  }
+        function updateDisplay() {
+            crystalDisplay.innerText = Math.floor(crystals);
+            cpsDisplay.innerText = autoMiners;
+            costDisplay.innerText = minerCost;
+            buyBtn.disabled = crystals < minerCost;
+        }
 
-  function spawnTarget() {
-    const gameArea = document.getElementById("gameArea");
-    gameArea.innerHTML = "";
-
-    const target = document.createElement("div");
-    target.classList.add("target");
-
-    const x = Math.random() * 360;
-    const y = Math.random() * 360;
-
-    target.style.left = x + "px";
-    target.style.top = y + "px";
-
-    target.onclick = () => {
-      score++;
-      document.getElementById("score").textContent = score;
-      spawnTarget();
-    };
-
-    gameArea.appendChild(target);
-  }
-</script>
-
+        // The Auto-Miner Logic (Runs every second)
+        setInterval(() => {
+            crystals += autoMiners;
+            updateDisplay();
+        }, 1000);
+    </script>
 </body>
 </html>
